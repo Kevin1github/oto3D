@@ -44,11 +44,11 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 //void preset2_callback(GtkWidget *widget, gpointer callback_data);
 //void preset3_callback(GtkWidget *widget, gpointer callback_data);
 
-// Support functions
+// chức năng hỗ trợ
 void processInput(GLFWwindow* window);
 unsigned int loadCubeMap();
 
-// Camera controls
+// điều khiển camera
 Camera camera(glm::vec3(0.0f, 2.5f, 8.0f), GL_FALSE);
 bool cameraFollow = true;
 glm::vec3 cameraFollowPos(0.0f);
@@ -60,23 +60,23 @@ bool rotating = false;
 float cameraRadius = 8.0f;
 bool switched = false;
 
-// Car controls
+// điều khiển xe
 short acceleration = 0;
 float steering = 0.0f;
 bool handbrake = false;
-float maxAcceleration = 800.0f;     // torque
-float maxVelocity = 50.0f;          // max limit
+float maxAcceleration = 800.0f;     // mô-men xoắn
+float maxVelocity = 50.0f;          // giới hạn tối đa
 bool getUp = false, gotUp = false;
 bool jump = false, jumped = false;
 float basePitch = 0.0f, baseYaw = 0.0f;
 
-// Car properties
+// các tính chất của xe
 float car_mass = 1250.0f;
-float tyre_mass_1 = 15.0f;          // front wheels
-float tyre_mass_2 = 20.0f;          // rear wheels
+float tyre_mass_1 = 15.0f;          // bánh trước
+float tyre_mass_2 = 20.0f;          // bánh sau
 float tyre_friction = 2.25f;
-float tyre_stiffness = 120000.0f;   // suspensions
-float tyre_damping = 0.0000200f;    // suspensions
+float tyre_stiffness = 120000.0f;   // hệ thống treo
+float tyre_damping = 0.0000200f;    // hệ thống treo
 float tyre_steering_angle = 0.5f;
 float assist = 0.5f;
 float lowLim = 0.0f;
@@ -86,7 +86,7 @@ const float cAngDamp = 0.4f;
 const float tLinDamp = 0.01f;
 const float tAngDamp = 0.2f;
 
-// Car components
+// linh kiện ô tô
 btRigidBody *car, *t1, *t2, *t3, *t4;
 btGeneric6DofSpringConstraint *c1, *c2, *c3, *c4;
 
@@ -116,7 +116,7 @@ btGeneric6DofSpringConstraint *c1, *c2, *c3, *c4;
 //GtkWidget *preset2;
 //GtkWidget *preset3;
 
-// Delta time
+// thời gian delta
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
@@ -252,7 +252,7 @@ int main() {
 
     gtk_widget_show_all(panel);*/
 
-    // Setup OpenGL environment
+    // cài đặt môi trường openGL
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -284,24 +284,24 @@ int main() {
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
 
-    // Our game
+    // về trò chơi
     glm::vec3 lightPos(0.0, 2.0, -1.0);
 
-    // Car
+    // xe
     Shader mShader("shaders/car.vert", "shaders/car.frag");
     Model mModel((char*) "models/car/car.obj");
     Model t1Model((char*) "models/car/tyref.obj");
     Model t2Model((char*) "models/car/tyreb.obj");
 
-    // Terrain
+    // địa hình
     Shader tShader("shaders/terrain.vert", "shaders/terrain.frag");
     Model tModel0((char*) "models/terrain/grass.obj");
     Model tModel1((char*) "models/terrain/asphalt.obj");
 
-    // Skybox
+    // bầu trời ảo (skybox)
     Shader sShader("shaders/skybox.vert", "shaders/skybox.frag");
     float skyboxVertices[] = {
-        // positions
+        // vị trí
         -1.0f,  1.0f, -1.0f,
         -1.0f, -1.0f, -1.0f,
          1.0f, -1.0f, -1.0f,
@@ -354,23 +354,23 @@ int main() {
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     unsigned int cubemapTexture = loadCubeMap();
 
-    // Physics world
+    // vật lý thế giới
     Physics simulation;
 
     maxAcceleration = 500.0f;
     maxVelocity = 50.0f;
 
-    car_mass = 1250.0f;           // 500 <-> 2k
+    car_mass = 1250.0f;           // khối lượng xe trong khoảng 500 <-> 2k
     tyre_mass_1 = 20.0f;          // 20.0
     tyre_mass_2 = 25.0f;          // 25.0
-    tyre_friction = 2.35f;        // 2.35
-    tyre_stiffness = 100000.0f;   // 80k +/- 30k <-> 120k +/- 30k
-    tyre_damping = 0.0000225f;    // 0.0000100 <-> 0.0000300 +/- 200 (depending on mass), 0.0000250 is stable
-    tyre_steering_angle = 0.5f;   // 0.5 <-> 1.0
+    tyre_friction = 2.35f;        // hệ số ma sát 2.35
+    tyre_stiffness = 100000.0f;   // biến thiên trong khoảng 80k +/- 30k <-> 120k +/- 30k, mô phỏng không quá mềm, quá cứng
+    tyre_damping = 0.0000225f;    // 0.0000100 <-> 0.0000300 +/- 200 (phụ thuộc vào mass), 0.0000250 có thể coi là ổn định
+    tyre_steering_angle = 0.5f;   // góc đánh lái tối đa 0.5 <-> 1.0
     lowLim = 0.0f;
     upLim = 0.1f;
 
-    // Terrain
+    // địa hình
     const unsigned int grid_width = 5;
     const unsigned int grid_height = 8;
     const unsigned int tiles = grid_width * grid_height;
@@ -396,32 +396,32 @@ int main() {
             //cout << i << ", " << j << ": " << i+j << ". " << i*(grid_height)+j << endl;
             glm::vec3 plane_rot = glm::vec3(0.0f, 0.0f, 0.0f);
             if (track[j][i] == 0) {
-                // Grass
+                // cỏ, các giá trị lần lượt là khối lượng, hệ số ma sát tĩnh và động
                 plane[i*(grid_height)+j] = simulation.createRigidBody(BOX, plane_pos[i*(grid_height)+j], plane_size[i*(grid_height)+j], plane_rot, 0.0f, 0.25f, 0.25f, COLL_TERRAIN, COLL_EVERYTHING);
             } else if (track[j][i] == 1) {
-                // Asphalt
+                // nhựa đường, nhô lên một chút, dày hơn mặt cỏ và ma sát cao hơn
                 plane[i*(grid_height)+j] = simulation.createRigidBody(BOX, plane_pos[i*(grid_height)+j] + glm::vec3(0.0f, 0.05f, 0.0f), plane_size[i*(grid_height)+j] + glm::vec3(0.0f, 0.05f, 0.0f), plane_rot, 0.0f, 0.5f, 0.5f, COLL_TERRAIN, COLL_EVERYTHING);
             }
 
         }
     }
 
-    // Invisible walls
-    const unsigned int walls = 4;
+    // tường vô hình
+    const unsigned int walls = 4; // số lượng
     float side;
-    glm::vec3 wall_pos;
-    glm::vec3 wall_size;
-    btRigidBody *wall;
+    glm::vec3 wall_pos; // vị trí của từng tường
+    glm::vec3 wall_size; // kích thước
+    btRigidBody *wall; // con trỏ đến rigid body của tường
 
-    side = plane_edge * grid_height;
-    wall_size = glm::vec3(2*side, 5.0f, 0.0f);
+    side = plane_edge * grid_height; // bán kính theo Z
+    wall_size = glm::vec3(2*side, 5.0f, 0.0f); // x theo chiều ngang, y chiều cao
 
-    wall_pos = glm::vec3(0.0f, 2.5f, -side);
+    wall_pos = glm::vec3(0.0f, 2.5f, -side); // tường theo z âm
     wall = simulation.createRigidBody(BOX, wall_pos, wall_size, glm::vec3(0.0f, 0.0f, 0.0f), 0.0f, 0.0f, 0.0f, COLL_TERRAIN, COLL_EVERYTHING);
-    wall_pos = glm::vec3(0.0f, 2.5f, side);
+    wall_pos = glm::vec3(0.0f, 2.5f, side); // tường theo z dương
     wall = simulation.createRigidBody(BOX, wall_pos, wall_size, glm::vec3(0.0f, 0.0f, 0.0f), 0.0f, 0.0f, 0.0f, COLL_TERRAIN, COLL_EVERYTHING);
 
-    side = plane_edge * grid_width;
+    side = plane_edge * grid_width; // bán kính theo x
     wall_size = glm::vec3(0.0f, 5.0f, 2*side);
 
     wall_pos = glm::vec3(-side, 2.5f, 0.0f);
@@ -430,13 +430,13 @@ int main() {
     wall = simulation.createRigidBody(BOX, wall_pos, wall_size, glm::vec3(0.0f, 0.0f, 0.0f), 0.0f, 0.0f, 0.0f, COLL_TERRAIN, COLL_EVERYTHING);
 
     // Muscle car
-    glm::vec3 spawn = glm::vec3(-40.0f, 0.0f, 0.0f);  // start position in world
+    glm::vec3 spawn = glm::vec3(-40.0f, 0.0f, 0.0f);  // vị trí bắt đầu trong thế giới
 
     glm::vec3 car_pos = glm::vec3(0.0f, 1.0f, 0.0f) + spawn;
-    glm::vec3 car_size = glm::vec3(1.0f, 0.6f, 3.0f);
-    glm::vec3 car_rot = glm::vec3(0.0f, 0.0f, 0.0f);
-    car = simulation.createRigidBody(BOX, car_pos, car_size, car_rot, car_mass, 1.75f, 0.2f, COLL_CHASSIS, COLL_EVERYTHING^COLL_CAR);
-    car->setSleepingThresholds(0.0, 0.0);   // never stop simulating
+    glm::vec3 car_size = glm::vec3(1.0f, 0.6f, 3.0f); // kích thước xe, mô phỏng khung xe
+    glm::vec3 car_rot = glm::vec3(0.0f, 0.0f, 0.0f); // không có xoay ban đầu
+    car = simulation.createRigidBody(BOX, car_pos, car_size, car_rot, car_mass, 1.75f, 0.2f, COLL_CHASSIS, COLL_EVERYTHING^COLL_CAR); // 
+    car->setSleepingThresholds(0.0, 0.0);   // không dừng mô phỏng
     car->setDamping(cLinDamp*assist, cAngDamp*assist);
 
     btTransform frameA, frameB;
@@ -445,7 +445,7 @@ int main() {
     glm::vec3 t1_size = glm::vec3(0.4f, 0.35f, 0.35f);
     glm::vec3 t1_rot = glm::vec3(0.0f, 0.0f, glm::radians(-90.0f));
     t1 = simulation.createRigidBody(CYLINDER, t1_pos, t1_size, t1_rot, tyre_mass_1, tyre_friction, 0.0f, COLL_TYRE, COLL_EVERYTHING^COLL_CAR);
-    t1->setSleepingThresholds(0.0, 0.0);    // never stop simulating
+    t1->setSleepingThresholds(0.0, 0.0);    // không dừng mô phỏng
     t1->setDamping(tLinDamp*assist, tAngDamp*assist);
     frameA = btTransform::getIdentity();
     frameB = btTransform::getIdentity();
