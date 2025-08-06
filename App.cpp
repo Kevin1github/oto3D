@@ -1,10 +1,6 @@
-/*
+﻿/*
     g++ src/* -o App -I ./includes -lGL -lglfw -ldl -lassimp -I ./includes/bullet/ ./includes/bullet/BulletDynamics/libBulletDynamics.a ./includes/bullet/BulletCollision/libBulletCollision.a ./includes/bullet/LinearMath/libLinearMath.a
 */
-
-#ifdef __linux__
-
-#endif // __linux__
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -18,31 +14,18 @@
 #include <utils/Model.hpp>
 #include <utils/Physics.hpp>
 
-//#include <gtk/gtk.h>
-
 #include <iostream>
 
-const unsigned int SCR_WIDTH    = 960;
-const unsigned int SCR_HEIGHT   = 540;
-const char* APP_NAME            = "OpenGL Car Physics demo";
+const unsigned int SCR_WIDTH = 960;
+const unsigned int SCR_HEIGHT = 540;
+const char* APP_NAME = "OpenGL Car Physics demo";
 
-// General callback functions
+// Hàm gọi lại
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
-// GUI callback functions
-//void mass_callback(GtkWidget *widget, gpointer callback_data);
-//void stiffness_callback(GtkWidget *widget, gpointer callback_data);
-//void damping_callback(GtkWidget *widget, gpointer callback_data);
-//void friction_callback(GtkWidget *widget, gpointer callback_data);
-//void steering_callback(GtkWidget *widget, gpointer callback_data);
-//void acceleration_callback(GtkWidget *widget, gpointer callback_data);
-//void stability_callback(GtkWidget *widget, gpointer callback_data);
-//void preset0_callback(GtkWidget *widget, gpointer callback_data);
-//void preset1_callback(GtkWidget *widget, gpointer callback_data);
-//void preset2_callback(GtkWidget *widget, gpointer callback_data);
-//void preset3_callback(GtkWidget *widget, gpointer callback_data);
+
 
 // chức năng hỗ trợ
 void processInput(GLFWwindow* window);
@@ -86,180 +69,31 @@ const float cAngDamp = 0.4f;
 const float tLinDamp = 0.01f;
 const float tAngDamp = 0.2f;
 
+//////////////////////////////////////////
+//float obstacleRadius = 3.0f; // phạm vi để xét va chạm
+////////////////////////////////////////////
+
 // linh kiện ô tô
-btRigidBody *car, *t1, *t2, *t3, *t4;
-btGeneric6DofSpringConstraint *c1, *c2, *c3, *c4;
+btRigidBody* car, * t1, * t2, * t3, * t4;
+btGeneric6DofSpringConstraint* c1, * c2, * c3, * c4;
 
-// UI widgets
-//GtkWidget *panel;
-//GtkWidget *vgrid;
 
-//GtkWidget *mass_text;
-//GtkWidget *mass;
-//GtkWidget *stiffness_text;
-//GtkWidget *stiffness;
-//GtkWidget *damping_text;
-//GtkWidget *damping;
-//GtkWidget *friction_text;
-//GtkWidget *friction;
-//GtkWidget *steer_text;
-//GtkWidget *steer;
-//GtkWidget *accelerate_text;
-//GtkWidget *accelerate;
-//GtkWidget *speedometer_text;
-//GtkWidget *speedometer;
-//GtkWidget *stability_text;
-//GtkWidget *stability;
-//GtkWidget *preset_text;
-//GtkWidget *preset0;
-//GtkWidget *preset1;
-//GtkWidget *preset2;
-//GtkWidget *preset3;
 
 // thời gian delta
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
 int main() {
-    /*
-    // Setup panel
-    gtk_init(0, NULL);
-
-    panel = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-    gtk_window_set_position(GTK_WINDOW(panel), GTK_WIN_POS_CENTER);
-    //gtk_window_set_default_size(GTK_WINDOW(panel), 230, 250);
-    gtk_window_set_resizable(GTK_WINDOW(panel), FALSE);
-    gtk_window_set_title(GTK_WINDOW(panel), "Vehicle settings");
-    gtk_container_set_border_width(GTK_CONTAINER(panel), 5);
-
-    vgrid = gtk_grid_new();
-    gtk_grid_set_row_homogeneous(GTK_GRID(vgrid), FALSE);
-    gtk_grid_set_column_homogeneous(GTK_GRID(vgrid), TRUE);
-    gtk_grid_set_row_spacing(GTK_GRID(vgrid), 2);
-    gtk_grid_set_column_spacing(GTK_GRID(vgrid), 2);
-    gtk_container_add(GTK_CONTAINER(panel), vgrid);
-
-    mass_text = gtk_label_new("Vehicle mass");
-    mass = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL, 500, 3000, 1);
-    //gtk_scale_set_draw_value(GTK_SCALE(stiffness), FALSE);
-    gtk_scale_add_mark(GTK_SCALE(mass), 500, GTK_POS_TOP, "Light");
-    gtk_scale_add_mark(GTK_SCALE(mass), 1250, GTK_POS_TOP, "Average");
-    gtk_scale_add_mark(GTK_SCALE(mass), 3000, GTK_POS_TOP, "Heavy");
-    gtk_range_set_value(GTK_RANGE(mass), 1250);
-
-    stiffness_text = gtk_label_new("Suspension stiffness");
-    stiffness = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL, 50000, 150000, 1);
-    //gtk_scale_set_draw_value(GTK_SCALE(stiffness), FALSE);
-    gtk_scale_add_mark(GTK_SCALE(stiffness), 50000, GTK_POS_TOP, "Weak");
-    gtk_scale_add_mark(GTK_SCALE(stiffness), 100000, GTK_POS_TOP, "Medium");
-    gtk_scale_add_mark(GTK_SCALE(stiffness), 150000, GTK_POS_TOP, "Strong");
-    gtk_range_set_value(GTK_RANGE(stiffness), 95000);
-
-    damping_text = gtk_label_new("Suspension damping");
-    damping = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL, 50, 500, 1);
-    //gtk_scale_set_draw_value(GTK_SCALE(damping), FALSE);
-    gtk_scale_add_mark(GTK_SCALE(damping), 50, GTK_POS_TOP, "Soft");
-    gtk_scale_add_mark(GTK_SCALE(damping), 200, GTK_POS_TOP, "Balanced");
-    gtk_scale_add_mark(GTK_SCALE(damping), 500, GTK_POS_TOP, "Hard");
-    gtk_range_set_value(GTK_RANGE(damping), 200);
-
-    friction_text = gtk_label_new("Tyre friction coefficient");
-    friction = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL, 0, 10, 0.01);
-    //gtk_scale_set_draw_value(GTK_SCALE(damping), FALSE);
-    gtk_scale_add_mark(GTK_SCALE(friction), 0, GTK_POS_TOP, "None");
-    gtk_scale_add_mark(GTK_SCALE(friction), 2.25, GTK_POS_TOP, "Normal");
-    gtk_scale_add_mark(GTK_SCALE(friction), 5, GTK_POS_TOP, "High");
-    gtk_scale_add_mark(GTK_SCALE(friction), 10, GTK_POS_TOP, "Extreme");
-    gtk_range_set_value(GTK_RANGE(friction), 2.25);
-
-    steer_text = gtk_label_new("Tyre steering angle");
-    steer = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL, 0, 1, 0.01);
-    //gtk_scale_set_draw_value(GTK_SCALE(damping), FALSE);
-    gtk_scale_add_mark(GTK_SCALE(steer), 0, GTK_POS_TOP, "Locked");
-    gtk_scale_add_mark(GTK_SCALE(steer), 0.25, GTK_POS_TOP, "Mild");
-    gtk_scale_add_mark(GTK_SCALE(steer), 0.5, GTK_POS_TOP, "Normal");
-    gtk_scale_add_mark(GTK_SCALE(steer), 0.7, GTK_POS_TOP, "Loose");
-    gtk_scale_add_mark(GTK_SCALE(steer), 1, GTK_POS_TOP, "Sharp");
-    gtk_range_set_value(GTK_RANGE(steer), 0.5);
-
-    accelerate_text = gtk_label_new("Acceleration power");
-    accelerate = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL, 0, 1000, 1);
-    //gtk_scale_set_draw_value(GTK_SCALE(damping), FALSE);
-    gtk_scale_add_mark(GTK_SCALE(accelerate), 0, GTK_POS_TOP, "None");
-    gtk_scale_add_mark(GTK_SCALE(accelerate), 250, GTK_POS_TOP, "Low");
-    gtk_scale_add_mark(GTK_SCALE(accelerate), 500, GTK_POS_TOP, "Medium");
-    gtk_scale_add_mark(GTK_SCALE(accelerate), 700, GTK_POS_TOP, "High");
-    gtk_scale_add_mark(GTK_SCALE(accelerate), 1000, GTK_POS_TOP, "Max");
-    gtk_range_set_value(GTK_RANGE(accelerate), 350);
-
-    stability_text = gtk_label_new("Stability assist");
-    stability = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL, 0, 1, 0.05);
-    //gtk_scale_set_draw_value(GTK_SCALE(damping), FALSE);
-    gtk_scale_add_mark(GTK_SCALE(stability), 0, GTK_POS_TOP, "Absent");
-    gtk_scale_add_mark(GTK_SCALE(stability), 0.25, GTK_POS_TOP, "Weak");
-    gtk_scale_add_mark(GTK_SCALE(stability), 0.5, GTK_POS_TOP, "Aware");
-    gtk_scale_add_mark(GTK_SCALE(stability), 0.75, GTK_POS_TOP, "Strong");
-    gtk_scale_add_mark(GTK_SCALE(stability), 1, GTK_POS_TOP, "Dramatic");
-    gtk_range_set_value(GTK_RANGE(stability), 0.5);
-
-    speedometer_text = gtk_label_new("Speedometer");
-    speedometer = gtk_level_bar_new_for_interval(0, 100);
-    gtk_level_bar_set_mode(GTK_LEVEL_BAR(speedometer), GTK_LEVEL_BAR_MODE_CONTINUOUS);
-
-    preset_text = gtk_label_new("Presets");
-    preset0 = gtk_button_new_with_label("Normal");
-    preset1 = gtk_button_new_with_label("Muscle");
-    preset2 = gtk_button_new_with_label("Pimp");
-    preset3 = gtk_button_new_with_label("Sport");
-
-    gtk_grid_attach(GTK_GRID(vgrid), mass_text, 0, 0, 4, 1);
-    gtk_grid_attach(GTK_GRID(vgrid), mass, 0, 1, 4, 1);
-    gtk_grid_attach(GTK_GRID(vgrid), stiffness_text, 0, 2, 4, 1);
-    gtk_grid_attach(GTK_GRID(vgrid), stiffness, 0, 3, 4, 1);
-    gtk_grid_attach(GTK_GRID(vgrid), damping_text, 0, 4, 4, 1);
-    gtk_grid_attach(GTK_GRID(vgrid), damping, 0, 5, 4, 1);
-    gtk_grid_attach(GTK_GRID(vgrid), friction_text, 0, 6, 4, 1);
-    gtk_grid_attach(GTK_GRID(vgrid), friction, 0, 7, 4, 1);
-    gtk_grid_attach(GTK_GRID(vgrid), steer_text, 0, 8, 4, 1);
-    gtk_grid_attach(GTK_GRID(vgrid), steer, 0, 9, 4, 1);
-    gtk_grid_attach(GTK_GRID(vgrid), accelerate_text, 0, 10, 4, 1);
-    gtk_grid_attach(GTK_GRID(vgrid), accelerate, 0, 11, 4, 1);
-    gtk_grid_attach(GTK_GRID(vgrid), stability_text, 0, 12, 4, 1);
-    gtk_grid_attach(GTK_GRID(vgrid), stability, 0, 13, 4, 1);
-    //gtk_grid_attach(GTK_GRID(vgrid), speedometer_text, 0, 12, 4, 1);
-    //gtk_grid_attach(GTK_GRID(vgrid), speedometer, 0, 13, 4, 1);
-    gtk_grid_attach(GTK_GRID(vgrid), preset_text, 0, 14, 4, 1);
-    gtk_grid_attach(GTK_GRID(vgrid), preset0, 0, 15, 2, 1);
-    gtk_grid_attach(GTK_GRID(vgrid), preset1, 2, 15, 2, 1);
-    gtk_grid_attach(GTK_GRID(vgrid), preset2, 0, 16, 2, 1);
-    gtk_grid_attach(GTK_GRID(vgrid), preset3, 2, 16, 2, 1);
-
-    gtk_grid_remove_row(GTK_GRID(vgrid), 17); */
-
-    /*g_signal_connect(G_OBJECT(mass), "value-changed", G_CALLBACK(mass_callback), G_OBJECT(mass));
-    g_signal_connect(G_OBJECT(stiffness), "value-changed", G_CALLBACK(stiffness_callback), G_OBJECT(stiffness));
-    g_signal_connect(G_OBJECT(damping), "value-changed", G_CALLBACK(damping_callback), G_OBJECT(damping));
-    g_signal_connect(G_OBJECT(friction), "value-changed", G_CALLBACK(friction_callback), G_OBJECT(friction));
-    g_signal_connect(G_OBJECT(steer), "value-changed", G_CALLBACK(steering_callback), G_OBJECT(steer));
-    g_signal_connect(G_OBJECT(accelerate), "value-changed", G_CALLBACK(acceleration_callback), G_OBJECT(accelerate));
-    g_signal_connect(G_OBJECT(stability), "value-changed", G_CALLBACK(stability_callback), G_OBJECT(stability));
-    g_signal_connect(G_OBJECT(preset0), "clicked", G_CALLBACK(preset0_callback), G_OBJECT(preset0));
-    g_signal_connect(G_OBJECT(preset1), "clicked", G_CALLBACK(preset1_callback), G_OBJECT(preset1));
-    g_signal_connect(G_OBJECT(preset2), "clicked", G_CALLBACK(preset2_callback), G_OBJECT(preset2));
-    g_signal_connect(G_OBJECT(preset3), "clicked", G_CALLBACK(preset3_callback), G_OBJECT(preset3));
-
-    g_signal_connect(G_OBJECT(panel), "destroy", G_CALLBACK(gtk_main_quit), G_OBJECT(panel));
-
-    gtk_widget_show_all(panel);*/
+   
 
     // cài đặt môi trường openGL
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    #ifdef __APPLE__
+#ifdef __APPLE__
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-    #endif
+#endif
     glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
     GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, APP_NAME, NULL, NULL);
@@ -275,7 +109,7 @@ int main() {
 
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 
-    if (!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) {
+    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
         std::cout << "ERROR: failed to initialise GLAD" << std::endl;
         glfwTerminate();
         return EXIT_FAILURE;
@@ -289,14 +123,73 @@ int main() {
 
     // xe
     Shader mShader("shaders/car.vert", "shaders/car.frag");
-    Model mModel((char*) "models/car/car.obj");
-    Model t1Model((char*) "models/car/tyref.obj");
-    Model t2Model((char*) "models/car/tyreb.obj");
+    Model mModel((char*)"models/car/car.obj");
+    Model t1Model((char*)"models/car/tyref.obj");
+    Model t2Model((char*)"models/car/tyreb.obj");
+
+    // vật cản/////////////////////////////////////////////////////////////////
+    Model obstacleModel((char*)"models/obstacle/obstacle1.obj");
+    glm::vec3 obstaclePos = glm::vec3(0.0f, 0.0f, 0.0f);
+    struct ObstacleData {
+        std::string name;            // "obstacle", "barrel", "barrier", etc.
+        glm::vec3 position;
+        glm::vec3 scale;             // scale vật thể (nếu có)
+    };
+
+    // 44 vật thể
+    std::vector<ObstacleData> allObstacles = {
+        {"obstacle", {-58.5f, 5.0f, -17.0f}, {0, 0, 0}},
+        {"obstacle1", {-54.6f, 18.2f, 0.3f}, {0.7f, 1.4f, 0.3f}},
+        {"obstacle2", {0, 0, 0}, {0, 0, 0}},
+        {"obstacle3", {0, 0, 0}, {0, 0, 0}},
+        {"obstacle4", {0, 0, 0}, {0, 0, 0}},
+        {"obstacle5", {0, 0, 0}, {0, 0, 0}},
+        {"obstacle6", {0, 0, 0}, {0, 0, 0}},
+        {"obstacle7", {0, 0, 0}, {0, 0, 0}},
+        {"obstacle8", {0, 0, 0}, {0, 0, 0}},
+        {"obstacle9", {0, 0, 0}, {0, 0, 0}},
+        {"obstacle10", {0, 0, 0}, {0, 0, 0}},
+        {"obstacle11", {0, 0, 0}, {0, 0, 0}},
+        {"obstacle12", {0, 0, 0}, {0, 0, 0}},
+        {"obstacle13", {0, 0, 0}, {0, 0, 0}},
+        {"obstacle14", {0, 0, 0}, {0, 0, 0}},
+        {"obstacle15", {0, 0, 0}, {0, 0, 0}},
+        {"obstacle16", {0, 0, 0}, {0, 0, 0}},
+        {"obstacle17", {0, 0, 0}, {0, 0, 0}},
+        {"obstacle18", {0, 0, 0}, {0, 0, 0}},
+        {"obstacle19", {0, 0, 0}, {0, 0, 0}},
+        {"obstacle20", {0, 0, 0}, {0, 0, 0}},
+        {"obstacle21", {0, 0, 0}, {0, 0, 0}},
+        {"obstacle22", {0, 0, 0}, {0, 0, 0}},
+        {"obstacle23", {0, 0, 0}, {0, 0, 0}},
+        {"obstacle24", {0, 0, 0}, {0, 0, 0}},
+        {"obstacle25", {0, 0, 0}, {0, 0, 0}},
+        {"obstacle26", {0, 0, 0}, {0, 0, 0}},
+        {"obstacle27", {0, 0, 0}, {0, 0, 0}},
+        {"obstacle28", {0, 0, 0}, {0, 0, 0}},
+        {"barrel",   {1, 1, 1}, {0, 0, 0}},
+        {"barrel1",   {0, 0, 0}, {0, 0, 0}},
+        {"barrier",  {0, 0, 0}, {0, 0, 0}},
+        {"barrier1",  {0, 0, 0}, {0, 0, 0}},
+        {"barrier2",  {0, 0, 0}, {0, 0, 0}},
+        {"barrier3",  {0, 0, 0}, {0, 0, 0}},
+        {"barrier4",  {0, 0, 0}, {0, 0, 0}},
+        {"barrier5",  {0, 0, 0}, {0, 0, 0}},
+        {"barrier6",  {0, 0, 0}, {0, 0, 0}},
+        {"barrier7",  {0, 0, 0}, {0, 0, 0}},
+        {"barrier8",  {0, 0, 0}, {0, 0, 0}},
+        {"barrier9",  {0, 0, 0}, {0, 0, 0}},
+        {"barrier10",  {0, 0, 0}, {0, 0, 0}},
+        {"cube1",     {0, 0, 0}, {0, 0, 0}},
+        {"cube2",     {0, 0, 0}, {0, 0, 0}},
+    };
+
+    ///////////////////////////////////////////////////////////////////////////
 
     // địa hình
     Shader tShader("shaders/terrain.vert", "shaders/terrain.frag");
-    Model tModel0((char*) "models/terrain/grass.obj");
-    Model tModel1((char*) "models/terrain/asphalt.obj");
+    Model tModel0((char*)"models/terrain/grass.obj");
+    Model tModel1((char*)"models/terrain/asphalt.obj");
 
     // bầu trời ảo (skybox)
     Shader sShader("shaders/skybox.vert", "shaders/skybox.frag");
@@ -384,23 +277,24 @@ int main() {
         { 0, 1, 1, 1, 0 },
         { 0, 0, 0, 0, 0 }
     };
-    btRigidBody *plane[tiles];
+    btRigidBody* plane[tiles];
     glm::vec3 plane_pos[tiles];
     glm::vec3 plane_size[tiles];
     const float plane_edge = 20.0f;
 
     for (unsigned int i = 0; i < grid_width; i++) {
         for (unsigned int j = 0; j < grid_height; j++) {
-            plane_pos[i*(grid_height)+j] = glm::vec3(2*plane_edge*i - plane_edge*(grid_width-1), -0.0f*(i*(grid_height)+j), 2*plane_edge*j - plane_edge*(grid_height-1));
-            plane_size[i*(grid_height)+j] = glm::vec3(plane_edge, 0.0f, plane_edge);
+            plane_pos[i * (grid_height)+j] = glm::vec3(2 * plane_edge * i - plane_edge * (grid_width - 1), -0.0f * (i * (grid_height)+j), 2 * plane_edge * j - plane_edge * (grid_height - 1));
+            plane_size[i * (grid_height)+j] = glm::vec3(plane_edge, 0.0f, plane_edge);
             //cout << i << ", " << j << ": " << i+j << ". " << i*(grid_height)+j << endl;
             glm::vec3 plane_rot = glm::vec3(0.0f, 0.0f, 0.0f);
             if (track[j][i] == 0) {
                 // cỏ, các giá trị lần lượt là khối lượng, hệ số ma sát tĩnh và động
-                plane[i*(grid_height)+j] = simulation.createRigidBody(BOX, plane_pos[i*(grid_height)+j], plane_size[i*(grid_height)+j], plane_rot, 0.0f, 0.25f, 0.25f, COLL_TERRAIN, COLL_EVERYTHING);
-            } else if (track[j][i] == 1) {
+                plane[i * (grid_height)+j] = simulation.createRigidBody(BOX, plane_pos[i * (grid_height)+j], plane_size[i * (grid_height)+j], plane_rot, 0.0f, 0.25f, 0.25f, COLL_TERRAIN, COLL_EVERYTHING);
+            }
+            else if (track[j][i] == 1) {
                 // nhựa đường, nhô lên một chút, dày hơn mặt cỏ và ma sát cao hơn
-                plane[i*(grid_height)+j] = simulation.createRigidBody(BOX, plane_pos[i*(grid_height)+j] + glm::vec3(0.0f, 0.05f, 0.0f), plane_size[i*(grid_height)+j] + glm::vec3(0.0f, 0.05f, 0.0f), plane_rot, 0.0f, 0.5f, 0.5f, COLL_TERRAIN, COLL_EVERYTHING);
+                plane[i * (grid_height)+j] = simulation.createRigidBody(BOX, plane_pos[i * (grid_height)+j] + glm::vec3(0.0f, 0.05f, 0.0f), plane_size[i * (grid_height)+j] + glm::vec3(0.0f, 0.05f, 0.0f), plane_rot, 0.0f, 0.5f, 0.5f, COLL_TERRAIN, COLL_EVERYTHING);
             }
 
         }
@@ -411,10 +305,10 @@ int main() {
     float side;
     glm::vec3 wall_pos; // vị trí của từng tường
     glm::vec3 wall_size; // kích thước
-    btRigidBody *wall; // con trỏ đến rigid body của tường
+    btRigidBody* wall; // con trỏ đến rigid body của tường
 
     side = plane_edge * grid_height; // bán kính theo Z
-    wall_size = glm::vec3(2*side, 5.0f, 0.0f); // x theo chiều ngang, y chiều cao
+    wall_size = glm::vec3(2 * side, 5.0f, 0.0f); // x theo chiều ngang, y chiều cao
 
     wall_pos = glm::vec3(0.0f, 2.5f, -side); // tường theo z âm
     wall = simulation.createRigidBody(BOX, wall_pos, wall_size, glm::vec3(0.0f, 0.0f, 0.0f), 0.0f, 0.0f, 0.0f, COLL_TERRAIN, COLL_EVERYTHING);
@@ -422,7 +316,7 @@ int main() {
     wall = simulation.createRigidBody(BOX, wall_pos, wall_size, glm::vec3(0.0f, 0.0f, 0.0f), 0.0f, 0.0f, 0.0f, COLL_TERRAIN, COLL_EVERYTHING);
 
     side = plane_edge * grid_width; // bán kính theo x
-    wall_size = glm::vec3(0.0f, 5.0f, 2*side);
+    wall_size = glm::vec3(0.0f, 5.0f, 2 * side);
 
     wall_pos = glm::vec3(-side, 2.5f, 0.0f);
     wall = simulation.createRigidBody(BOX, wall_pos, wall_size, glm::vec3(0.0f, 0.0f, 0.0f), 0.0f, 0.0f, 0.0f, COLL_TERRAIN, COLL_EVERYTHING);
@@ -435,18 +329,18 @@ int main() {
     glm::vec3 car_pos = glm::vec3(0.0f, 1.0f, 0.0f) + spawn;
     glm::vec3 car_size = glm::vec3(1.0f, 0.6f, 3.0f); // kích thước xe, mô phỏng khung xe
     glm::vec3 car_rot = glm::vec3(0.0f, 0.0f, 0.0f); // không có xoay ban đầu
-    car = simulation.createRigidBody(BOX, car_pos, car_size, car_rot, car_mass, 1.75f, 0.2f, COLL_CHASSIS, COLL_EVERYTHING^COLL_CAR); // 
+    car = simulation.createRigidBody(BOX, car_pos, car_size, car_rot, car_mass, 1.75f, 0.2f, COLL_CHASSIS, COLL_EVERYTHING ^ COLL_CAR); // 
     car->setSleepingThresholds(0.0, 0.0);   // không dừng mô phỏng
-    car->setDamping(cLinDamp*assist, cAngDamp*assist);
+    car->setDamping(cLinDamp * assist, cAngDamp * assist);
 
     btTransform frameA, frameB;
 
     glm::vec3 t1_pos = glm::vec3(-1.0f, 0.5f, -2.1f) + spawn;
     glm::vec3 t1_size = glm::vec3(0.4f, 0.35f, 0.35f);
     glm::vec3 t1_rot = glm::vec3(0.0f, 0.0f, glm::radians(-90.0f));
-    t1 = simulation.createRigidBody(CYLINDER, t1_pos, t1_size, t1_rot, tyre_mass_1, tyre_friction, 0.0f, COLL_TYRE, COLL_EVERYTHING^COLL_CAR);
+    t1 = simulation.createRigidBody(CYLINDER, t1_pos, t1_size, t1_rot, tyre_mass_1, tyre_friction, 0.0f, COLL_TYRE, COLL_EVERYTHING ^ COLL_CAR);
     t1->setSleepingThresholds(0.0, 0.0);    // không dừng mô phỏng
-    t1->setDamping(tLinDamp*assist, tAngDamp*assist);
+    t1->setDamping(tLinDamp * assist, tAngDamp * assist);
     frameA = btTransform::getIdentity();
     frameB = btTransform::getIdentity();
     frameA.getBasis().setEulerZYX(0, 0, 0);
@@ -467,9 +361,9 @@ int main() {
     glm::vec3 t2_pos = glm::vec3(1.0f, 0.5f, -2.1f) + spawn;
     glm::vec3 t2_size = glm::vec3(0.4f, 0.35f, 0.35f);
     glm::vec3 t2_rot = glm::vec3(0.0f, 0.0f, glm::radians(90.0f));
-    t2 = simulation.createRigidBody(CYLINDER, t2_pos, t2_size, t2_rot, tyre_mass_1, tyre_friction, 0.0f, COLL_TYRE, COLL_EVERYTHING^COLL_CAR);
+    t2 = simulation.createRigidBody(CYLINDER, t2_pos, t2_size, t2_rot, tyre_mass_1, tyre_friction, 0.0f, COLL_TYRE, COLL_EVERYTHING ^ COLL_CAR);
     t2->setSleepingThresholds(0.0, 0.0);
-    t2->setDamping(tLinDamp*assist, tAngDamp*assist);
+    t2->setDamping(tLinDamp * assist, tAngDamp * assist);
     frameA = btTransform::getIdentity();
     frameB = btTransform::getIdentity();
     frameA.getBasis().setEulerZYX(0, 0, 0);
@@ -490,9 +384,9 @@ int main() {
     glm::vec3 t3_pos = glm::vec3(-1.0f, 0.5f, 1.6f) + spawn;
     glm::vec3 t3_size = glm::vec3(0.45f, 0.4f, 0.4f);
     glm::vec3 t3_rot = glm::vec3(0.0f, 0.0f, glm::radians(-90.0f));
-    t3 = simulation.createRigidBody(CYLINDER, t3_pos, t3_size, t3_rot, tyre_mass_2, tyre_friction, 0.0f, COLL_TYRE, COLL_EVERYTHING^COLL_CAR);
+    t3 = simulation.createRigidBody(CYLINDER, t3_pos, t3_size, t3_rot, tyre_mass_2, tyre_friction, 0.0f, COLL_TYRE, COLL_EVERYTHING ^ COLL_CAR);
     t3->setSleepingThresholds(0.0, 0.0);
-    t3->setDamping(tLinDamp*assist, tAngDamp*assist);
+    t3->setDamping(tLinDamp * assist, tAngDamp * assist);
     frameA = btTransform::getIdentity();
     frameB = btTransform::getIdentity();
     frameA.getBasis().setEulerZYX(0, 0, 0);
@@ -512,9 +406,9 @@ int main() {
     glm::vec3 t4_pos = glm::vec3(1.0f, 0.5f, 1.6f) + spawn;
     glm::vec3 t4_size = glm::vec3(0.45f, 0.4f, 0.4f);
     glm::vec3 t4_rot = glm::vec3(0.0f, 0.0f, glm::radians(90.0f));
-    t4 = simulation.createRigidBody(CYLINDER, t4_pos, t4_size, t4_rot, tyre_mass_2, tyre_friction, 0.0f, COLL_TYRE, COLL_EVERYTHING^COLL_CAR);
+    t4 = simulation.createRigidBody(CYLINDER, t4_pos, t4_size, t4_rot, tyre_mass_2, tyre_friction, 0.0f, COLL_TYRE, COLL_EVERYTHING ^ COLL_CAR);
     t4->setSleepingThresholds(0.0, 0.0);
-    t4->setDamping(tLinDamp*assist, tAngDamp*assist);
+    t4->setDamping(tLinDamp * assist, tAngDamp * assist);
     frameA = btTransform::getIdentity();
     frameB = btTransform::getIdentity();
     frameA.getBasis().setEulerZYX(0, 0, 0);
@@ -538,6 +432,31 @@ int main() {
 
     GLfloat maxSecPerFrame = 1.0f / 50.0f;
 
+    /*// tạo rigidBody cho vật thể//////////////////////////////////////
+    std::vector<btRigidBody*> obstacleBodies;
+
+    for (const auto& obs : allObstacles) {
+        btCollisionShape* shape = new btBoxShape(btVector3(
+            obs.scale.x * 0.5f, obs.scale.y * 0.5f, obs.scale.z * 0.5f
+        ));
+
+        btTransform transform;
+        transform.setIdentity();
+        transform.setOrigin(btVector3(obs.position.x, obs.position.y, obs.position.z));
+
+        btScalar mass = 0.0f; // static
+        btVector3 inertia(0, 0, 0);
+
+        btDefaultMotionState* motionState = new btDefaultMotionState(transform);
+        btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, motionState, shape, inertia);
+        btRigidBody* body = new btRigidBody(rbInfo);
+
+        body->setUserIndex(1); // gắn flag để nhận biết là obstacle
+
+        simulation.dynamicsWorld->addRigidBody(body);
+        obstacleBodies.push_back(body);
+    }
+    ///////////////////////////////////////////////////////////////////////*/
 
     // Game loop
     while (!glfwWindowShouldClose(window)) {
@@ -556,14 +475,47 @@ int main() {
         btMatrix3x3 rot = car->getWorldTransform().getBasis();
         short braking = 1;
 
+        //////////////////////////////
+        btTransform trans;
+        car->getMotionState()->getWorldTransform(trans);
+        glm::vec3 carPos = glm::vec3(trans.getOrigin().getX(), trans.getOrigin().getY(), trans.getOrigin().getZ());
+
+        std::cout << "Xe o vi tri: " << carPos.x << ", " << carPos.y << ", " << carPos.z << std::endl;
+
+        for (const auto& obs : allObstacles) {
+            std::cout << "Vat the " << obs.name << " o vi tri: " << obs.position.x << ", " << obs.position.y << ", " << obs.position.z << std::endl;
+            float carRadius = 2.5f;
+            float obsRadius = 2.5f;
+
+            float distance = glm::length(carPos - obs.position);
+
+            std::cout << "Khoang cach: " << distance << std::endl;
+
+            if (distance < (carRadius + obsRadius)) {
+                std::cout << "Va cham voi " << obs.name << std::endl;
+
+                // Reset vị trí xe
+                btTransform reset;
+                reset.setIdentity();
+                reset.setOrigin(btVector3(-40.0f, 1.0f, 0.0f)); // vị trí spawn ban đầu
+                car->setWorldTransform(reset);
+                car->getMotionState()->setWorldTransform(reset);
+                car->setLinearVelocity(btVector3(0, 0, 0));
+                car->setAngularVelocity(btVector3(0, 0, 0));
+                break;
+            }
+        }
+        ////////////////////////////////
+
         // Acceleration
         float linearVelocity = car->getLinearVelocity().length();
         //gtk_level_bar_set_value(GTK_LEVEL_BAR(speedometer), linearVelocity);
-        if (acceleration < 0 && linearVelocity > maxVelocity/10) {
+        if (acceleration < 0 && linearVelocity > maxVelocity / 10) {
             braking = 0;
-        } else {
-            if (linearVelocity < maxVelocity/(1 + 9*(acceleration < 0))) {
-                float torque = -maxAcceleration * acceleration * (1-(abs(steering)*(linearVelocity>10))/2);
+        }
+        else {
+            if (linearVelocity < maxVelocity / (1 + 9 * (acceleration < 0))) {
+                float torque = -maxAcceleration * acceleration * (1 - (abs(steering) * (linearVelocity > 10)) / 2);
                 t1->applyTorque(rot * btVector3(torque, 0, 0));
                 t2->applyTorque(rot * btVector3(torque, 0, 0));
                 if (!handbrake) {
@@ -574,10 +526,10 @@ int main() {
         }
 
         // Braking / steering
-        c1->setAngularLowerLimit(btVector3(braking, tyre_steering_angle*steering, 0));
-        c1->setAngularUpperLimit(btVector3(-braking, tyre_steering_angle*steering, 0));
-        c2->setAngularLowerLimit(btVector3(braking, tyre_steering_angle*steering, 0));
-        c2->setAngularUpperLimit(btVector3(-braking, tyre_steering_angle*steering, 0));
+        c1->setAngularLowerLimit(btVector3(braking, tyre_steering_angle * steering, 0));
+        c1->setAngularUpperLimit(btVector3(-braking, tyre_steering_angle * steering, 0));
+        c2->setAngularLowerLimit(btVector3(braking, tyre_steering_angle * steering, 0));
+        c2->setAngularUpperLimit(btVector3(-braking, tyre_steering_angle * steering, 0));
 
         // Handbrake
         if (handbrake) {
@@ -585,7 +537,8 @@ int main() {
             c3->setAngularUpperLimit(btVector3(0, 0, 0));
             c4->setAngularLowerLimit(btVector3(0, 0, 0));
             c4->setAngularUpperLimit(btVector3(0, 0, 0));
-        } else {
+        }
+        else {
             c3->setAngularLowerLimit(btVector3(braking, 0, 0));
             c3->setAngularUpperLimit(btVector3(-braking, 0, 0));
             c4->setAngularLowerLimit(btVector3(braking, 0, 0));
@@ -603,6 +556,68 @@ int main() {
             car->applyCentralImpulse(btVector3(0, 10000, 0));
         }
 
+        /*///////////////////////////////////////////////////////////////////////////////
+        btVector3 carPos = car->getCenterOfMassPosition();
+        glm::vec3 carPosGLM = glm::vec3(carPos.x(), carPos.y(), carPos.z());
+
+        float distance = glm::distance(carPosGLM, obstaclePos);
+
+        if (distance < obstacleRadius) {
+            // Nếu xe quá gần vật cản → dừng hẳn lại
+            car->setLinearVelocity(btVector3(0, 0, 0));
+            car->setAngularVelocity(btVector3(0, 0, 0));
+        }
+        ///////////////////////////////////////////////////////////////////////////////*/
+
+        /*// kiểm tra va chạm//////////////////////////////////////////////////////
+        int numManifolds = simulation.dynamicsWorld->getDispatcher()->getNumManifolds();
+
+        for (int i = 0; i < numManifolds; ++i) {
+            btPersistentManifold* contactManifold = simulation.dynamicsWorld->getDispatcher()->getManifoldByIndexInternal(i);
+
+            const btRigidBody* bodyA = static_cast<const btRigidBody*>(contactManifold->getBody0());
+            const btRigidBody* bodyB = static_cast<const btRigidBody*>(contactManifold->getBody1());
+
+            bool carInvolved = (bodyA == car || bodyB == car);
+            bool obstacleInvolved = (bodyA->getUserIndex() == 1 || bodyB->getUserIndex() == 1);
+
+            if (carInvolved && obstacleInvolved) {
+                // Reset xe về điểm bắt đầu
+                car->setWorldTransform(btTransform(btQuaternion(0, 0, 0, 1), btVector3(spawn.x, spawn.y, spawn.z)));
+                car->setLinearVelocity(btVector3(0, 0, 0));
+                car->setAngularVelocity(btVector3(0, 0, 0));
+                break;
+            }
+        }
+        ///////////////////////////////////////////////////////////////////////////////////*/
+
+        /*// kiểm tra va chạm ver2 /////////////////////////////////////////////
+        //btVector3 carPos_bt = car->getWorldTransform().getOrigin();
+        //glm::vec3 carPos = glm::vec3(carPos_bt.getX(), carPos_bt.getY(), carPos_bt.getZ());
+
+        float carRadius = 3.0f; // bán kính an toàn của xe
+
+        for (const auto& obs : allObstacles) {
+            //float obstacleRadius = 10.0f; // tạm cho tất cả vật thể bán kính giống nhau, hoặc gán riêng cho từng loại
+            glm::vec3 diff = carPos - obs.position;
+            float distance = glm::length(diff);
+
+            if (distance < (carRadius + obstacleRadius)) {
+                std::cout << "Xe chạm vật thể: " << obs.name << "!" << std::endl;
+
+                // Reset vị trí xe
+                btTransform reset;
+                reset.setIdentity();
+                reset.setOrigin(btVector3(-40.0f, 0.0f, 0.0f));
+                car->setWorldTransform(reset);
+                car->setLinearVelocity(btVector3(0, 0, 0));
+                car->setAngularVelocity(btVector3(0, 0, 0));
+
+                break; // tránh reset nhiều lần trong 1 frame
+            }
+        }
+        /////////////////////////////////////////////////////////////////////*/
+
         // Step physics forward
         simulation.dynamicsWorld->stepSimulation((deltaTime < maxSecPerFrame ? deltaTime : maxSecPerFrame), 10);
 
@@ -613,10 +628,10 @@ int main() {
 
             car->getMotionState()->getWorldTransform(temp);
             float aVelocity = -car->getAngularVelocity().y();
-            newPos = temp.getBasis() * btVector3(glm::cos(glm::radians(-10*glm::sqrt(glm::abs(steering))*aVelocity+90 + baseYaw/4))*cameraRadius, 0, glm::sin(glm::radians(-10*glm::sqrt(glm::abs(steering))*aVelocity + 90 + baseYaw/4))*cameraRadius);
+            newPos = temp.getBasis() * btVector3(glm::cos(glm::radians(-10 * glm::sqrt(glm::abs(steering)) * aVelocity + 90 + baseYaw / 4)) * cameraRadius, 0, glm::sin(glm::radians(-10 * glm::sqrt(glm::abs(steering)) * aVelocity + 90 + baseYaw / 4)) * cameraRadius);
 
             cameraFollowPos.x = temp.getOrigin().getX() + newPos.x();
-            cameraFollowPos.y = temp.getOrigin().getY() - glm::sin(glm::radians(camera.Pitch))*cameraRadius +1.5;
+            cameraFollowPos.y = temp.getOrigin().getY() - glm::sin(glm::radians(camera.Pitch)) * cameraRadius + 1.5;
             cameraFollowPos.z = temp.getOrigin().getZ() + newPos.z();
 
             //camera.Yaw = glm::degrees(temp.getBasis().getColumn(2).length())
@@ -644,22 +659,23 @@ int main() {
         glm::mat4 planeModelMatrix = glm::mat4(1.0f);
         for (unsigned int i = 0; i < grid_width; i++) {
             for (unsigned int j = 0; j < grid_height; j++) {
-                planeModelMatrix = glm::translate(planeModelMatrix, plane_pos[i*(grid_height)+j]);
+                planeModelMatrix = glm::translate(planeModelMatrix, plane_pos[i * (grid_height)+j]);
                 glUniformMatrix4fv(glGetUniformLocation(tShader.Program, "model"), 1, GL_FALSE, glm::value_ptr(planeModelMatrix));
 
-        if (track[j][i] == 0) {
-            // Grass
-            tShader.setFloat("material.shininess", 4.0f);
-            tShader.setVec3("light.diffuse", 1.195f, 1.105f, 0.893f);
-            tShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
-            tModel0.Draw(tShader);
-        } else if (track[j][i] == 1) {
-            // Asphalt
-            tShader.setFloat("material.shininess", 16.0f);
-            tShader.setVec3("light.diffuse", 0.945f, 0.855f, 0.643f);
-            tShader.setVec3("light.specular", 2.75f, 2.75f, 2.75f);
-            tModel1.Draw(tShader);
-        }
+                if (track[j][i] == 0) {
+                    // Grass
+                    tShader.setFloat("material.shininess", 4.0f);
+                    tShader.setVec3("light.diffuse", 1.195f, 1.105f, 0.893f);
+                    tShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
+                    tModel0.Draw(tShader);
+                }
+                else if (track[j][i] == 1) {
+                    // Asphalt
+                    tShader.setFloat("material.shininess", 16.0f);
+                    tShader.setVec3("light.diffuse", 0.945f, 0.855f, 0.643f);
+                    tShader.setVec3("light.specular", 2.75f, 2.75f, 2.75f);
+                    tModel1.Draw(tShader);
+                }
 
                 planeModelMatrix = glm::mat4(1.0f);
             }
@@ -682,15 +698,28 @@ int main() {
         glm::vec3 obj_size(1.0f);
         Model* objectModel;
 
+        // vật cản/////////////////////////////////////////////////////////////////////////////////////
+        for (const auto& obs : allObstacles) {
+            glm::mat4 ModelMatrix = glm::mat4(1.0f);
+            //glm::vec3 obstaclePos = glm::vec3(0.0f, 0.0f, 0.0f);
+            //float obstacleRadius = 3.0f; // phạm vi để xét va chạm
+            //ModelMatrix = glm::translate(ModelMatrix, obs.position);
+            //ModelMatrix = glm::scale(ModelMatrix, obs.scale); // scale nếu cần
+
+            mShader.setMat4("model", ModelMatrix);
+            obstacleModel.Draw(mShader);
+        }
+        ///////////////////////////////////////////////////////////////////////////////////////////////
+
         int num_cobjs = simulation.dynamicsWorld->getNumCollisionObjects();
 
-        for (unsigned int i=tiles+walls; i<num_cobjs;i++)
+        for (unsigned int i = tiles + walls; i < num_cobjs;i++)
         {
             switch (i) {
-                case tiles+walls: objectModel = &mModel; break;
-                case tiles+walls+1: case tiles+walls+2: objectModel = &t1Model; break;
-                case tiles+walls+3: case tiles+walls+4: objectModel = &t2Model; break;
-                default: return(EXIT_FAILURE);
+            case tiles + walls: objectModel = &mModel; break;
+            case tiles + walls + 1: case tiles + walls + 2: objectModel = &t1Model; break;
+            case tiles + walls + 3: case tiles + walls + 4: objectModel = &t2Model; break;
+            default: return(EXIT_FAILURE);
             }
             // we take the Collision Object from the list
             btCollisionObject* obj = simulation.dynamicsWorld->getCollisionObjectArray()[i];
@@ -771,7 +800,8 @@ void processInput(GLFWwindow* window) {
         switched = true;
         if (cameraFollow) {
             glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-        } else {
+        }
+        else {
             glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
         }
     }
@@ -784,12 +814,13 @@ void processInput(GLFWwindow* window) {
         if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
             camera.ProcessKeyboard(FORWARD, deltaTime);
         if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
-        camera.ProcessKeyboard(BACKWARD, deltaTime);
+            camera.ProcessKeyboard(BACKWARD, deltaTime);
         if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
-        camera.ProcessKeyboard(LEFT, deltaTime);
+            camera.ProcessKeyboard(LEFT, deltaTime);
         if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
-        camera.ProcessKeyboard(RIGHT, deltaTime);
-    } else {
+            camera.ProcessKeyboard(RIGHT, deltaTime);
+    }
+    else {
         //if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS))
     }
 
@@ -800,10 +831,12 @@ void processInput(GLFWwindow* window) {
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
         if (steering > -steering_limit)
             steering -= steering_speed;
-    } else if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+    }
+    else if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
         if (steering < steering_limit)
             steering += steering_speed;
-    } else {
+    }
+    else {
         steering -= steering_speed * ((steering > 0) - (steering < 0));
         if (steering < steering_speed && steering > -steering_speed)
             steering = 0.0f;
@@ -812,9 +845,11 @@ void processInput(GLFWwindow* window) {
     // Car controls - acceleration
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
         acceleration = 1;
-    } else if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+    }
+    else if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
         acceleration = -1;
-    } else {
+    }
+    else {
         acceleration = 0;
         handbrake = true;
     }
@@ -822,7 +857,8 @@ void processInput(GLFWwindow* window) {
     // Car controls - handbrake
     if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
         handbrake = true;
-    } else {
+    }
+    else {
         handbrake = false;
     }
 
@@ -830,7 +866,8 @@ void processInput(GLFWwindow* window) {
     if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS && !gotUp) {
         getUp = true;
         gotUp = true;
-    } else {
+    }
+    else {
         getUp = false;
     }
     if (glfwGetKey(window, GLFW_KEY_R) == GLFW_RELEASE) {
@@ -841,7 +878,8 @@ void processInput(GLFWwindow* window) {
     if (glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS && !jumped) {
         jump = true;
         jumped = true;
-    } else {
+    }
+    else {
         jump = false;
     }
     if (glfwGetKey(window, GLFW_KEY_T) == GLFW_RELEASE) {
@@ -866,7 +904,8 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 
     if (!cameraFollow) {
         camera.ProcessMouseMovement(xoffset, yoffset);
-    } else if (rotating) {
+    }
+    else if (rotating) {
         baseYaw += xoffset;
         basePitch += yoffset;
         if (basePitch > 89.0f)
@@ -888,7 +927,7 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mod) 
 // ----------------------------------------------------------------------
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
-    cameraRadius -= yoffset/2;
+    cameraRadius -= yoffset / 2;
     if (basePitch > 20.0f)
         basePitch = 20.0f;
     if (basePitch < 0.0f)
@@ -901,7 +940,7 @@ unsigned int loadCubeMap() {
     glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
 
     int width, height, channels;
-    unsigned char *data;
+    unsigned char* data;
     std::vector<std::string> txt_faces;
     txt_faces.push_back("textures/clouds1/clouds1_east.bmp");
     txt_faces.push_back("textures/clouds1/clouds1_west.bmp");
@@ -926,99 +965,3 @@ unsigned int loadCubeMap() {
     return textureID;
 }
 
-/* GUI callback functions
-void mass_callback(GtkWidget *widget, gpointer callback_data) {
-    car_mass = gtk_range_get_value(GTK_RANGE(widget));
-    btVector3 inertia;
-    car->getCollisionShape()->calculateLocalInertia(car_mass, inertia);
-    car->setMassProps(car_mass, inertia);
-    cout << "Mass: " << car_mass << endl;
-}
-
-void stiffness_callback(GtkWidget *widget, gpointer callback_data) {
-    tyre_stiffness = gtk_range_get_value(GTK_RANGE(widget));
-    c1->setStiffness(1, tyre_stiffness);
-    c2->setStiffness(1, tyre_stiffness);
-    c3->setStiffness(1, tyre_stiffness);
-    c4->setStiffness(1, tyre_stiffness);
-    cout << "Stiffness: " << tyre_stiffness << endl;
-}
-
-void damping_callback(GtkWidget *widget, gpointer callback_data) {
-    tyre_damping = gtk_range_get_value(GTK_RANGE(widget))/10000000;
-    c1->setDamping(1, tyre_damping);
-    c2->setDamping(1, tyre_damping);
-    c3->setDamping(1, tyre_damping);
-    c4->setDamping(1, tyre_damping);
-    cout << "Damping: " << tyre_damping << endl;
-}
-
-void friction_callback(GtkWidget *widget, gpointer callback_data) {
-    tyre_friction = gtk_range_get_value(GTK_RANGE(widget));
-    t1->setFriction(tyre_friction);
-    t2->setFriction(tyre_friction);
-    t3->setFriction(tyre_friction);
-    t4->setFriction(tyre_friction);
-    cout << "Friction: " << tyre_friction << endl;
-}
-
-void steering_callback(GtkWidget *widget, gpointer callback_data) {
-    tyre_steering_angle = gtk_range_get_value(GTK_RANGE(widget));
-    cout << "Steering angle: " << tyre_steering_angle << endl;
-}
-
-void acceleration_callback(GtkWidget *widget, gpointer callback_data) {
-    maxAcceleration = gtk_range_get_value(GTK_RANGE(widget));
-    cout << "Acceleration: " << maxAcceleration << endl;
-}
-
-void stability_callback(GtkWidget *widget, gpointer callback_data) {
-    assist = gtk_range_get_value(GTK_RANGE(widget));
-    car->setDamping(tLinDamp*assist, tAngDamp*assist);
-    t1->setDamping(tLinDamp*assist, tAngDamp*assist);
-    t2->setDamping(tLinDamp*assist, tAngDamp*assist);
-    t3->setDamping(tLinDamp*assist, tAngDamp*assist);
-    t4->setDamping(tLinDamp*assist, tAngDamp*assist);
-    cout << "Stability: " << assist << endl;
-}
-
-void preset0_callback(GtkWidget *widget, gpointer callback_data) {
-    gtk_range_set_value(GTK_RANGE(mass), 1250);
-    gtk_range_set_value(GTK_RANGE(stiffness), 95000);
-    gtk_range_set_value(GTK_RANGE(damping), 200);
-    gtk_range_set_value(GTK_RANGE(friction), 2.25);
-    gtk_range_set_value(GTK_RANGE(steer), 0.5);
-    gtk_range_set_value(GTK_RANGE(accelerate), 350);
-    cout << "Preset: Normal" << endl;
-}
-
-void preset1_callback(GtkWidget *widget, gpointer callback_data) {
-    gtk_range_set_value(GTK_RANGE(mass), 1440);
-    gtk_range_set_value(GTK_RANGE(stiffness), 70000);
-    gtk_range_set_value(GTK_RANGE(damping), 130);
-    gtk_range_set_value(GTK_RANGE(friction), 1.95);
-    gtk_range_set_value(GTK_RANGE(steer), 0.7);
-    gtk_range_set_value(GTK_RANGE(accelerate), 480);
-    cout << "Preset: Muscle Car" << endl;
-}
-
-void preset2_callback(GtkWidget *widget, gpointer callback_data) {
-    gtk_range_set_value(GTK_RANGE(mass), 1560);
-    gtk_range_set_value(GTK_RANGE(stiffness), 80000);
-    gtk_range_set_value(GTK_RANGE(damping), 420);
-    gtk_range_set_value(GTK_RANGE(friction), 1.75);
-    gtk_range_set_value(GTK_RANGE(steer), 0.69);
-    gtk_range_set_value(GTK_RANGE(accelerate), 420);
-    cout << "Preset: Pimp My Ride" << endl;
-}
-
-void preset3_callback(GtkWidget *widget, gpointer callback_data) {
-    gtk_range_set_value(GTK_RANGE(mass), 1780);
-    gtk_range_set_value(GTK_RANGE(stiffness), 13000);
-    gtk_range_set_value(GTK_RANGE(damping), 190);
-    gtk_range_set_value(GTK_RANGE(friction), 2.45);
-    gtk_range_set_value(GTK_RANGE(steer), 0.73);
-    gtk_range_set_value(GTK_RANGE(accelerate), 680);
-    cout << "Preset: Sport" << endl;
-}
-*/
