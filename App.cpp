@@ -139,7 +139,7 @@ int main() {
     // 44 vật thể
     std::vector<ObstacleData> allObstacles = {
         {"obstacle", {-58.5f, 5.0f, -17.0f}, {0, 0, 0}},
-        {"obstacle1", {-54.6f, 18.2f, 0.3f}, {0.7f, 1.4f, 0.3f}},
+        {"obstacle1", {-54.6f, 18.2f, 0.3f}, {0, 0, 0}},
         {"obstacle2", {0, 0, 0}, {0, 0, 0}},
         {"obstacle3", {0, 0, 0}, {0, 0, 0}},
         {"obstacle4", {0, 0, 0}, {0, 0, 0}},
@@ -507,7 +507,7 @@ int main() {
         }
         ////////////////////////////////
 
-        // Acceleration
+        // gia tốc
         float linearVelocity = car->getLinearVelocity().length();
         //gtk_level_bar_set_value(GTK_LEVEL_BAR(speedometer), linearVelocity);
         if (acceleration < 0 && linearVelocity > maxVelocity / 10) {
@@ -525,13 +525,13 @@ int main() {
             }
         }
 
-        // Braking / steering
+        // phanh/đánh lai
         c1->setAngularLowerLimit(btVector3(braking, tyre_steering_angle * steering, 0));
         c1->setAngularUpperLimit(btVector3(-braking, tyre_steering_angle * steering, 0));
         c2->setAngularLowerLimit(btVector3(braking, tyre_steering_angle * steering, 0));
         c2->setAngularUpperLimit(btVector3(-braking, tyre_steering_angle * steering, 0));
 
-        // Handbrake
+        // phanh tay
         if (handbrake) {
             c3->setAngularLowerLimit(btVector3(0, 0, 0));
             c3->setAngularUpperLimit(btVector3(0, 0, 0));
@@ -546,12 +546,12 @@ int main() {
         }
 
 
-        // Get up
+        // bật dậy
         if (getUp) {
             car->applyTorqueImpulse(rot * btVector3(0, 0, 12000));
         }
 
-        // Jump
+        // nhảy
         if (jump) {
             car->applyCentralImpulse(btVector3(0, 10000, 0));
         }
@@ -618,10 +618,10 @@ int main() {
         }
         /////////////////////////////////////////////////////////////////////*/
 
-        // Step physics forward
+        // Tiến hành mô phỏng vật lý một bước
         simulation.dynamicsWorld->stepSimulation((deltaTime < maxSecPerFrame ? deltaTime : maxSecPerFrame), 10);
 
-        // Update camera position
+        // cập nhật vị trí camera
         if (cameraFollow) {
             btTransform temp;
             btVector3 newPos;
@@ -640,11 +640,11 @@ int main() {
             camera.LookAt(-newPos.x(), newPos.y(), -newPos.z());
         }
 
-        // Transforms
+        // phép biến đổi
         glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 10000.0f);
         glm::mat4 view = camera.GetViewMatrix();
 
-        // Terrain
+        // địa hình
         tShader.Use();
         tShader.setMat4("projection", projection);
         tShader.setMat4("view", view);
@@ -663,14 +663,14 @@ int main() {
                 glUniformMatrix4fv(glGetUniformLocation(tShader.Program, "model"), 1, GL_FALSE, glm::value_ptr(planeModelMatrix));
 
                 if (track[j][i] == 0) {
-                    // Grass
+                    // cỏ
                     tShader.setFloat("material.shininess", 4.0f);
                     tShader.setVec3("light.diffuse", 1.195f, 1.105f, 0.893f);
                     tShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
                     tModel0.Draw(tShader);
                 }
                 else if (track[j][i] == 1) {
-                    // Asphalt
+                    // nhựa đường
                     tShader.setFloat("material.shininess", 16.0f);
                     tShader.setVec3("light.diffuse", 0.945f, 0.855f, 0.643f);
                     tShader.setVec3("light.specular", 2.75f, 2.75f, 2.75f);
@@ -681,7 +681,7 @@ int main() {
             }
         }
 
-        // Car
+        // xe ô tô
         mShader.Use();
         mShader.setMat4("projection", projection);
         mShader.setMat4("view", view);
@@ -721,23 +721,23 @@ int main() {
             case tiles + walls + 3: case tiles + walls + 4: objectModel = &t2Model; break;
             default: return(EXIT_FAILURE);
             }
-            // we take the Collision Object from the list
+            // chúng ta lấy Đối tượng Va chạm từ danh sách
             btCollisionObject* obj = simulation.dynamicsWorld->getCollisionObjectArray()[i];
 
-            // we upcast it in order to use the methods of the main class RigidBody
+            // chúng ta ép kiểu lên để sử dụng các phương thức của lớp chính RigidBody
             btRigidBody* body = btRigidBody::upcast(obj);
 
-            // we take the transformation matrix of the rigid boby, as calculated by the physics engine
+            // chúng ta lấy ma trận biến đổi của rigid body, được tính bởi engine vật lý
             body->getMotionState()->getWorldTransform(transform);
 
-            // we convert the Bullet matrix (transform) to an array of floats
+            // chúng ta chuyển đổi ma trận Bullet (transform) thành một mảng float
             transform.getOpenGLMatrix(matrix);
 
-            // we create the GLM transformation matrix
+            // chúng ta tạo ma trận biến đổi GLM
             objModelMatrix = glm::make_mat4(matrix) * glm::scale(objModelMatrix, obj_size);
             objNormalMatrix = glm::transpose(glm::inverse(glm::mat3(objModelMatrix)));
 
-            // we create the normal matrix
+            // chúng ta tạo ma trận pháp tuyến
             glUniformMatrix4fv(glGetUniformLocation(mShader.Program, "model"), 1, GL_FALSE, glm::value_ptr(objModelMatrix));
             glUniformMatrix3fv(glGetUniformLocation(mShader.Program, "normal"), 1, GL_FALSE, glm::value_ptr(objNormalMatrix));
 
@@ -756,10 +756,10 @@ int main() {
             mShader.setInt("skybox", 3);
             glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
 
-            // we render the model
-            // N.B.) if the number of models is relatively low, this approach (we render the same mesh several time from the same buffers) can work. If we must render hundreds or more of copies of the same mesh, there are more advanced techniques to manage Instanced Rendering (see https://learnopengl.com/#!Advanced-OpenGL/Instancing for examples).
+            // chúng ta vẽ mô hình
+            // Lưu ý: nếu số lượng mô hình tương đối ít, cách tiếp cận này (vẽ cùng một mesh nhiều lần từ cùng buffer) vẫn hiệu quả. Nếu cần vẽ hàng trăm hoặc nhiều hơn các bản sao của cùng một mesh, có những kỹ thuật nâng cao hơn để quản lý Vẽ Theo Lô (Instanced Rendering)
             objectModel->Draw(mShader);
-            // we "reset" the matrix
+            // chúng ta "đặt lại" ma trận
             objModelMatrix = glm::mat4(1.0f);
             objNormalMatrix = glm::mat4(1.0f);
         }
@@ -770,7 +770,7 @@ int main() {
 
         view = glm::mat4(glm::mat3(camera.GetViewMatrix()));
 
-        // Skybox
+        // hộp bầu trời
         glDepthFunc(GL_LEQUAL);
         sShader.Use();
         sShader.setMat4("projection", projection);
@@ -789,12 +789,12 @@ int main() {
 }
 
 void processInput(GLFWwindow* window) {
-    // Exit application
+    // thoát ứng dụng
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, GL_TRUE);
     }
 
-    // Switch between free-movement and following camera
+    // Chuyển đổi giữa chế độ camera tự do và camera theo sau
     if (glfwGetKey(window, GLFW_KEY_TAB) == GLFW_PRESS && !switched) {
         cameraFollow = !cameraFollow;
         switched = true;
@@ -809,7 +809,7 @@ void processInput(GLFWwindow* window) {
         switched = false;
     }
 
-    // Control free-movement camera
+    // điều khiển camera tự do
     if (!cameraFollow) {
         if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
             camera.ProcessKeyboard(FORWARD, deltaTime);
@@ -827,7 +827,7 @@ void processInput(GLFWwindow* window) {
     float steering_limit = 1.0f;
     float steering_speed = 0.05f;
 
-    // Car controls - steering
+    // Điều khiển xe - đánh lái
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
         if (steering > -steering_limit)
             steering -= steering_speed;
@@ -842,7 +842,7 @@ void processInput(GLFWwindow* window) {
             steering = 0.0f;
     }
 
-    // Car controls - acceleration
+    // điều khiển xa - gia tốc
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
         acceleration = 1;
     }
@@ -854,7 +854,7 @@ void processInput(GLFWwindow* window) {
         handbrake = true;
     }
 
-    // Car controls - handbrake
+    // điều khiển xe - phanh tay
     if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
         handbrake = true;
     }
@@ -862,7 +862,7 @@ void processInput(GLFWwindow* window) {
         handbrake = false;
     }
 
-    // Car controls - get up
+    // điều khiển xa - bật dậy
     if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS && !gotUp) {
         getUp = true;
         gotUp = true;
@@ -874,7 +874,7 @@ void processInput(GLFWwindow* window) {
         gotUp = false;
     }
 
-    // Car controls - jump upwards
+    // điều khiển xe - nhảy về phía trước
     if (glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS && !jumped) {
         jump = true;
         jumped = true;
@@ -897,7 +897,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
     }
 
     float xoffset = xpos - lastX;
-    float yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
+    float yoffset = lastY - ypos; // đảo ngược vì tọa độ y tăng từ dưới lên trên
 
     lastX = xpos;
     lastY = ypos;
@@ -923,7 +923,7 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mod) 
         rotating = false;
 }
 
-// glfw: whenever the mouse scroll wheel scrolls, this callback is called
+// glfw: mỗi khi con lăn chuột cuộn, hàm callback này sẽ được gọi
 // ----------------------------------------------------------------------
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
